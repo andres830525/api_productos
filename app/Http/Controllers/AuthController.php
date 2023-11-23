@@ -5,63 +5,72 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request; // For handling HTTP requests
 use Illuminate\Support\Facades\Auth; // For handling authentication
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use App\Models\User; // User model
 
 // Define AuthController class which extends Controller
 class AuthController extends Controller
 {
-// Function to handle user registration
+
+//Funcion para manejar el proceso de regisreo en la Api
 public function register(Request $request)
 {
-// Validate incoming request fields
-    /* $request->validate([
+
+//Se validan los campos que llegan por el request
+     $request->validate([
     'name' => 'required|string|max:255', // Name must be a string, not exceed 255 characters and it is required
     'email' => 'required|string|email|max:255|unique:users', // Email must be a string, a valid email, not exceed 255 characters, it is required and it must be unique in the users table
     'password' => 'required|string|min:6', // Password must be a string, at least 6 characters and it is required
-]); */
+]); 
 
-// Create new User
+// Se crea el nuevo usuario
 $user = User::create([
 'name' => $request->name,
 'email' => $request->email,
-'password' => bcrypt($request->password), // Hash the password
+'password' => bcrypt($request->password), // Se encripta el password
 ]);
 
-// Return user data as JSON with a 201 (created) HTTP status code
+
+//Retorna los datos del usuario como un JSON con el codigo 201 (created) HTTP status code
 return response()->json(['user' => $user], 201);
 }
 
-// Function to handle user login
+// Funcion para manejar el login de el usuario
 public function login(Request $request)
 {
-// Validate incoming request fields
+// Se validan los campos que vinen de el request
 $request->validate([
-'email' => 'required|string|email', // Email must be a string, a valid email and it is required
-'password' => 'required|string', // Password must be a string and it is required
+'email' => 'required|string|email', // El campo email debe ser de tipo string, email valido y es requerido
+'password' => 'required|string',   // El password debe ser un string  y es requerido
 ]);
 
-// Check if the provided credentials are valid
 if (!Auth::attempt($request->only('email', 'password'))) {
-// If not, return error message with a 401 (Unauthorized) HTTP status code
+
+//Si las credenciales son invalidas se retorna un mensaje con el codigo de error  401 (Unauthorized) HTTP status code
 return response()->json(['message' => 'Invalid login details'], 401);
 }
 
-// If credentials are valid, get the authenticated user
+
+// Si las credenciales son validas se obtiene al usario autenticado
+
 $user = $request->user();
-// Create a new token for this user
+
+//Se crea un nuevo token para este usuario
 $token = $user->createToken('authToken')->plainTextToken;
 
-// Return user data and token as JSON
-return response()->json(['user' => $user, 'token' => $token]);
+// Se retorna los datos del usuario y el token como JSON
+return response()->json(['user' => $user, 'token' => $token, 'Success'=>'true', 'Message'=> "Successful login",'iUserId'=>$user->id]);
 }
 
-// Function to handle user logout
+// Funcion para manejar el logout 
 public function logout(Request $request)
 {
-  // Delete all tokens for the authenticated user
+  // Se borran todos los tokens para el usuario autenticado
   $request->user()->tokens()->delete();
 
-   // Return success message as JSON
+
+   //S retorna un mensaje en JSON
    return response()->json(['message' => 'Logged out']);
 }
 }

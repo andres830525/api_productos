@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class ProductoController extends Controller
 {
 
-   
+
     /**
      * Display a listing of the resource.
      *
@@ -18,9 +18,8 @@ class ProductoController extends Controller
      */
     public function index()
     {
-        return response()->json(Producto::all(), 200);
 
-        //return new ProductoCollection(Producto::paginate(10));
+        return new ProductoCollection(Producto::paginate(10));
         //return Producto::all();
 
     }
@@ -32,7 +31,6 @@ class ProductoController extends Controller
      */
     public function create()
     {
-        
     }
 
     /**
@@ -43,18 +41,15 @@ class ProductoController extends Controller
      */
     public function store(Request $request)
     {
-        /* $validatedData = $request->validate([
-            'name' => 'required|max:255',
-            'description' => 'required',
-            'price' => 'required|numeric',
-      ]); */
-      
-      
-       
-      
+        $validatedData = $request->validate([
+            'titulo' => 'required|max:255',
+            'descripcion' => 'required',
+            'imagen' => 'required',
+            'precio' => 'required|numeric',
+        ]);
 
-        $producto = Producto::create($request->all);
-        return response()->json($producto, 201); 
+        $producto = Producto::create($validatedData);
+        return response()->json($producto, 201);
     }
 
     /**
@@ -63,21 +58,33 @@ class ProductoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Producto $producto)
+    public function show(string $id)
     {
-       
-        //$product = Product::find($producto->id);
-        
-     // Check if the product was found
-    if ($poducto=1) {
-        // Return the product as a JSON response with a 200 HTTP status code
+
+
+
+
+
+        // Retorna el producto desde la base de datos usando el id de el producto ingresado
+        $producto = Producto::find($id);
+        //dd($producto);
+
+
+
+        // Validamos si el Producto existe
+        if ($producto !== null) {
+            //dd($producto);
+
+            // Se retorna el producto como un JSON con el codigo 200 HTTP status
+
             return response()->json(new ProductoResource($producto), 200);
-         } else {
-     // Return a 404 Not Found HTTP status code if the product was not found
-        return response()->json(['message' => 'Product not found'], 404);
-        
+        } else {
+
+            //Se retorna 404 Not Found HTTP status code si el producto no fue encontrado
+
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
     }
-}
 
     /**
      * Show the form for editing the specified resource.
@@ -97,32 +104,34 @@ class ProductoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Producto $producto)
+    public function update(Request $request,  string $id)
     {
 
-        // Validate the request data
-    $validatedData = $request->validate([
-        'name' => 'required|max:255',
-        'description' => 'required',
-        'price' => 'required|numeric',
-  ]);
 
-  // Check if the product was found
-if ($product) {
-    // Update the product with the validated data
-    $product->update($validatedData);
-    
-    
-      // Return the updated product as a JSON response with a 200 HTTP status code
-       return response()->json($product, 200);
-    } else {
-      // Return a 404 Not Found HTTP status code if the product was not found
-      return response()->json(['message' => 'Product not found'], 404);
-    }
-  
-    
-       /*  $producto->update($request->all());
-        return response()->json($producto, 200); */
+        // Validamos los datos de request
+        $validatedData = $request->validate([
+            'titulo' => 'required|max:255',
+            'descripcion' => 'required',
+            'imagen' => 'required',
+            'precio' => 'required|numeric',
+        ]);
+
+        $producto = Producto::find($id);
+
+        // Si el producto fue encontrado
+        if ($producto) {
+            // Se actualiza el producto con los datos validados
+            $producto->update($validatedData);
+
+
+
+            //Se retorna el producto actualizado como un JSON con un 200 HTTP status code
+            return response()->json($producto, 200,);
+        } else {
+            //Se retorna 404 Not Found HTTP status code si el producto no fue encontrado
+
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
     }
 
     /**
@@ -131,23 +140,23 @@ if ($product) {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, Producto $producto)
+    public function destroy(Request $request, string $id)
     {
-        // Check if the product was found
-        if ($product=1) {
-        // Delete the product
-        $producto->delete();
-      
-      
-        // Return a 204 No Content HTTP status code
-        return response()->json(null, 204);
-      } else {
-        // Return a 404 Not Found HTTP status code if the product was not found
-        return response()->json(['message' => 'Product not found'], 404);
-      }
-      }
-    /* {
-        $producto->delete();
-        return response()->json(null, 204);
-    } */
+
+
+        $producto = Producto::find($id);
+
+        // Si el producto fue encontrado
+        if ($producto !== null) {
+            // Borrar producto
+            $producto->delete();
+
+
+            // Return a 204 No Content HTTP status code
+            return response()->json(null, 204);
+        } else {
+           //Se retorna 404 Not Found HTTP status code si el producto no fue encontrado
+           return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
+    }
 }
